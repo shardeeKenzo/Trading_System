@@ -6,6 +6,7 @@
 #include "OrderBook.h"
 #include "MatchingEngine.h"
 #include "Trade.h"
+#include "../Server/protocol.h"
 
 /**
  * Definition for trading system. It connects order book and matching engine so specific matching engine can properly operate on external order book.
@@ -15,6 +16,10 @@ public:
     TradingSystem(OrderBook order_book, const MatchingEngine& matching_engine) : order_book_ {std::move(order_book)},
     matching_engine_ {matching_engine}
     {}
+
+    Trades process(const OrderAdd& add);
+    Trades process(const OrderCancel& cancel);
+    Trades process(const OrderModify& modify);
 
     /**
      * Call for the trading system to place an order
@@ -29,8 +34,8 @@ public:
      */
     Trades systemDeleteOrder(OrderID order_id);
 
-    OrderBook getOrderBook() const;
-    MatchingEngine getMatchingEngine() const;
+    const OrderBook& getOrderBook() const;
+    const MatchingEngine& getMatchingEngine() const;
 
 private:
     OrderBook order_book_;

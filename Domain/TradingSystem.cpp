@@ -31,5 +31,5 @@ Trades TradingSystem::systemDeleteOrder(const OrderID order_id)
     return matchTrades;
 }
 
-OrderBook TradingSystem::getOrderBook() const { return order_book_; }
-MatchingEngine TradingSystem::getMatchingEngine() const { return matching_engine_; }
+const OrderBook& TradingSystem::getOrderBook() const { return order_book_; }
+const MatchingEngine& TradingSystem::getMatchingEngine() const { return matching_engine_; }

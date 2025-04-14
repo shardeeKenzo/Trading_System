@@ -1,28 +1,26 @@
-#include "TradingSystem.h"
+#include <boost/asio.hpp>
+#include "Server/tcp_server.h"
+#include "Domain/TradingSystem.h"
+#include "Domain/OrderBook.h"
+#include "Domain/MatchingEngine.h"
+#include <iostream>
 
-int main()
-{
-    constexpr MatchingEngine matching_engine{};
-    const OrderBook order_book {};
+int main() {
+    try {
+        boost::asio::io_context io_context;
+        // Create core trading objects.
+        OrderBook orderBook;
+        MatchingEngine matchingEngine;
+        TradingSystem tradingSystem(orderBook, matchingEngine);
 
-    TradingSystem trading_system {order_book, matching_engine };
+        // Instantiate the TCP server with our trading system.
+        tcp_server server(io_context, &tradingSystem);
 
-    trading_system.systemPlaceOrder(15, 100, Side::Buy, OrderType::GoodTillCancel);
-    trading_system.systemPlaceOrder(15, 100, Side::Buy, OrderType::GoodTillCancel);
-    trading_system.systemPlaceOrder(15, 100, Side::Buy, OrderType::GoodTillCancel);
-
-    trading_system.getOrderBook().printDictionary();
-    trading_system.systemDeleteOrder(3);
-    trading_system.getOrderBook().printDictionary();
-
-    trading_system.systemPlaceOrder(15, 500, Side::Sell, OrderType::FillOrKill);
-    trading_system.systemPlaceOrder(15, 10, Side::Sell, OrderType::GoodTillCancel);
-    trading_system.systemPlaceOrder(15, 50, Side::Sell, OrderType::GoodTillCancel);
-    trading_system.systemPlaceOrder(15, 300, Side::Sell, OrderType::GoodTillCancel);
-
-    trading_system.getOrderBook().printDictionary();
-    trading_system.getOrderBook().printQuantityAtLevelAsks(15);
-
+        std::cout << "Server running on port 5000..." << std::endl;
+        io_context.run();
+    } catch (std::exception& e) {
+        std::cerr << "Exception: " << e.what() << "\n";
+    }
     return 0;
 }
 
