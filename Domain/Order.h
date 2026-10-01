@@ -13,6 +13,7 @@ using OrderID = size_t;
  */
 enum class Side
 {
+    Undefined,
     Buy,
     Sell,
 };
@@ -22,6 +23,7 @@ enum class Side
  */
 enum class OrderType
 {
+    Undefined,
     GoodTillCancel,
     FillOrKill,
     ImmediateOrCancel,

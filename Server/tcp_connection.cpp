@@ -76,27 +76,32 @@ void tcp_connection::process_message(const boost::system::error_code& ec, std::s
         case 1:
             {
                 OrderAdd* order_add = reinterpret_cast<OrderAdd*>(data_);
-                Trades trades = tradingSystem_->process(order_add);
+                ProcessResult p_result = tradingSystem_->process(*order_add);
 
+                resp.accepted = p_result.accepted_;
                 resp.status = 0;
-                resp.order_id = 0;
+                resp.order_id = p_result.order_id;
                 break;
             }
         case 2:
             {
                 OrderModify* order_modify = reinterpret_cast<OrderModify*>(data_);
-                Trades trades = tradingSystem_->process(order_modify);
+                ProcessResult p_result = tradingSystem_->process(*order_modify);
 
+                resp.accepted = p_result.accepted_;
                 resp.status = 0;
-                resp.order_id = 0;
+                resp.order_id = p_result.order_id;
+                break;
             }
         case 3:
             {
                 OrderCancel* order_cancel = reinterpret_cast<OrderCancel*>(data_);
-                Trades trades = tradingSystem_->process(order_cancel);
+                ProcessResult p_result = tradingSystem_->process(*order_cancel);
 
+                resp.accepted = p_result.accepted_;
                 resp.status = 0;
-                resp.order_id = 0;
+                resp.order_id = p_result.order_id;
+                break;
             }
         }
 

@@ -8,6 +8,13 @@
 #include "Trade.h"
 #include "../Server/protocol.h"
 
+struct ProcessResult
+{
+    OrderID order_id;
+    bool accepted_;
+    Trades trades_;
+};
+
 /**
  * Definition for trading system. It connects order book and matching engine so specific matching engine can properly operate on external order book.
  */
@@ -17,22 +24,22 @@ public:
     matching_engine_ {matching_engine}
     {}
 
-    Trades process(const OrderAdd& add);
-    Trades process(const OrderCancel& cancel);
-    Trades process(const OrderModify& modify);
+    ProcessResult process(const OrderAdd& add);
+    ProcessResult process(const OrderCancel& cancel);
+    ProcessResult process(const OrderModify& modify);
 
     /**
      * Call for the trading system to place an order
      */
-    Trades systemPlaceOrder(Price price, Quantity quantity, Side side, OrderType type);
+    ProcessResult systemPlaceOrder(Price price, Quantity quantity, Side side, OrderType type);
     /**
      * Call for the trading system to modify an order
      */
-    Trades systemOrderModify(OrderID order_id, Price price, Quantity quantity, OrderType type);
+    ProcessResult systemOrderModify(OrderID order_id, Price price, Quantity quantity, OrderType type);
     /**
      * Call for the trading system to delete an order
      */
-    Trades systemDeleteOrder(OrderID order_id);
+    ProcessResult systemDeleteOrder(OrderID order_id);
 
     const OrderBook& getOrderBook() const;
     const MatchingEngine& getMatchingEngine() const;
@@ -40,6 +47,9 @@ public:
 private:
     OrderBook order_book_;
     MatchingEngine matching_engine_;
+
+    Side checkOrderSide(const uint8_t& side_);
+    OrderType checkOrderType(const uint8_t& type_);
 };
 
 #endif //TRADINGSYSTEM_H

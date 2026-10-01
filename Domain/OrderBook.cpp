@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-void OrderBook::placeOrder(Price price, Quantity quantity, Side side, OrderType type)
+OrderID OrderBook::placeOrder(Price price, Quantity quantity, Side side, OrderType type)
 {
 
     const auto order = std::make_shared<Order>(++counter,price,quantity,side,type);
@@ -28,6 +28,8 @@ void OrderBook::placeOrder(Price price, Quantity quantity, Side side, OrderType 
             it->second.push_back(order);
         }
     }
+
+    return order->getID();
 }
 
 void OrderBook::deleteOrder(OrderID order_id)
@@ -64,7 +66,7 @@ void OrderBook::deleteOrder(OrderID order_id)
     }
 }
 
-void OrderBook::modifyOrder(OrderID order_id, const Price price, const Quantity quantity, const OrderType type)
+OrderID OrderBook::modifyOrder(OrderID order_id, const Price price, const Quantity quantity, const OrderType type)
 {
     if (!order_dictionary.contains(order_id))
     {
@@ -74,22 +76,26 @@ void OrderBook::modifyOrder(OrderID order_id, const Price price, const Quantity 
     bool shouldBeReinserted = false;
 
     const auto& order = order_dictionary[order_id];
+    const Side side = order->getSide();
+
 
     if (price != order->getPrice() || type != order->getType())
     {
         shouldBeReinserted = true;
         deleteOrder(order_id);
-
     }
 
-    order->setPrice(price);
-    order->setQuantity(quantity);
-    order->setType(type);
-
-    if (shouldBeReinserted)
+    if (!shouldBeReinserted)
     {
-        placeOrder(price, quantity, order->getSide(), type);
+        order->setPrice(price);
+        order->setQuantity(quantity);
+        order->setType(type);
+    } else
+    {
+        order_id = placeOrder(price, quantity, side, type);
     }
+
+    return order_id;
 }
 
 std::shared_ptr<Order> OrderBook::getBestAsk() const

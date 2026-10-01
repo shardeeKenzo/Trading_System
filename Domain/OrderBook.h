@@ -22,7 +22,7 @@ public:
     /**
     *  Place order with following parameters in orderbook and order dictionary
     */
-    void placeOrder(Price price, Quantity quantity, Side side, OrderType type);
+    OrderID placeOrder(Price price, Quantity quantity, Side side, OrderType type);
 
     /**
     *  Delete order with following id
@@ -31,7 +31,7 @@ public:
     /**
     *  Modify order with following parameters
     */
-    void modifyOrder(OrderID order_id, Price price, Quantity quantity, OrderType type);
+    OrderID modifyOrder(OrderID order_id, Price price, Quantity quantity, OrderType type);
 
     std::shared_ptr<Order> getBestAsk() const;
     std::shared_ptr<Order> getBestBid() const;

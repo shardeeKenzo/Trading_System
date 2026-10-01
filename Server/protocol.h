@@ -13,8 +13,8 @@ struct OrderAdd : public Header
 {
     double price;
     uint32_t quantity;
-    uint8_t side; // 0 - buy, 1 - sell
-    uint8_t orderType; // 0 - GoodTillCancel, 2 - FOK, 3 - IOC
+    uint8_t side; // 1 - buy, 2 - sell
+    uint8_t orderType; // 1 - GoodTillCancel, 2 - FOK, 3 - IOC
 };
 
 struct OrderCancel : public Header
@@ -27,12 +27,13 @@ struct OrderModify : public Header
     uint32_t order_id; // for modify/delete
     double price;
     uint32_t quantity;
-    uint8_t side; // 0 - buy, 1 - sell
-    uint8_t orderType; // 0 - GoodTillCancel, 2 - FOK, 3 - IOC
+    uint8_t side; // 1 - buy, 2 - sell
+    uint8_t orderType; // 1 - GoodTillCancel, 2 - FOK, 3 - IOC
 };
 
 struct OrderResponse
 {
+    bool accepted;
     uint8_t status; // 0 - ok, 1 - error
     uint32_t order_id;
 };
