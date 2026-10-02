@@ -62,27 +62,27 @@ ProcessResult TradingSystem::systemPlaceOrder(const Price price, const Quantity 
     {
         if (!matching_engine_.canMatch(order_book_, side, price, type, quantity))
         {
-            return { .order_id = 0, .accepted_ = false, .trades_ = { }};
+            return { .order_id = 0, .accepted_ = 1, .trades_ = { }};
         }
     }
     const auto order_id = order_book_.placeOrder(price, quantity, side, type);
 
     Trades matchTrades = matching_engine_.matchOrders(order_book_);
-    return {.order_id = order_id, .accepted_ = true, .trades_ = matchTrades};
+    return {.order_id = order_id, .accepted_ = 0, .trades_ = matchTrades};
 }
 ProcessResult TradingSystem::systemOrderModify(const OrderID order_id, const Price price, const Quantity quantity, const OrderType type)
 {
     auto id = order_book_.modifyOrder(order_id, price, quantity, type);
 
     Trades matchTrades = matching_engine_.matchOrders(order_book_);
-    return {.order_id = id, .accepted_ = true,  .trades_ = matchTrades};
+    return {.order_id = id, .accepted_ = 0,  .trades_ = matchTrades};
 }
 ProcessResult TradingSystem::systemDeleteOrder(const OrderID order_id)
 {
     order_book_.deleteOrder(order_id);
 
     Trades matchTrades = matching_engine_.matchOrders(order_book_);
-    return {.order_id = order_id, .accepted_ = true, .trades_ = matchTrades };
+    return {.order_id = order_id, .accepted_ = 0, .trades_ = matchTrades };
 }
 
 const OrderBook& TradingSystem::getOrderBook() const { return order_book_; }

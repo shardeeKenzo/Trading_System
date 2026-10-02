@@ -1,5 +1,6 @@
 #include "tcp_connection.h"
 #include <iostream>
+#include <stdexcept>
 #include <cstring>
 
 void tcp_connection::start() {
@@ -37,6 +38,7 @@ void tcp_connection::do_read() {
                         break;
                     default:
                         std::cerr << "Unknown command: " << static_cast<int>(header->command) << "\n";
+                        do_write({.accepted = 1, .status = 1, .order_id = 0});
                     return;
                 }
                 if (expected_size > sizeof(Header))
@@ -86,7 +88,18 @@ void tcp_connection::process_message(const boost::system::error_code& ec, std::s
         case 2:
             {
                 OrderModify* order_modify = reinterpret_cast<OrderModify*>(data_);
-                ProcessResult p_result = tradingSystem_->process(*order_modify);
+                ProcessResult p_result {};
+                try
+                {
+                    p_result = tradingSystem_->process(*order_modify);
+                } catch (const std::invalid_argument& e)
+                {
+                    std::cerr << "Exception: " << e.what() << std::endl;
+                    resp.accepted = 1;
+                    resp.status = 1;
+                    resp.order_id = 0;
+                    break;
+                }
 
                 resp.accepted = p_result.accepted_;
                 resp.status = 0;
@@ -96,7 +109,19 @@ void tcp_connection::process_message(const boost::system::error_code& ec, std::s
         case 3:
             {
                 OrderCancel* order_cancel = reinterpret_cast<OrderCancel*>(data_);
-                ProcessResult p_result = tradingSystem_->process(*order_cancel);
+                ProcessResult p_result {};
+
+                try
+                {
+                   p_result = tradingSystem_->process(*order_cancel);
+                } catch (const std::invalid_argument& e)
+                {
+                    std::cerr << "Exception: " << e.what() << std::endl;
+                    resp.accepted = 1;
+                    resp.status = 1;
+                    resp.order_id = 0;
+                    break;
+                }
 
                 resp.accepted = p_result.accepted_;
                 resp.status = 0;

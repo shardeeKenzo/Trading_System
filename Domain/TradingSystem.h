@@ -11,7 +11,7 @@
 struct ProcessResult
 {
     OrderID order_id;
-    bool accepted_;
+    uint8_t accepted_;
     Trades trades_;
 };
 

@@ -33,7 +33,7 @@ struct OrderModify : public Header
 
 struct OrderResponse
 {
-    bool accepted;
+    uint8_t accepted; // 0 - order was somehow touched, 1 - no order involved
     uint8_t status; // 0 - ok, 1 - error
     uint32_t order_id;
 };
