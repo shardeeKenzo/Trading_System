@@ -35,7 +35,7 @@ private:
     //initiate async read for an order request
     void do_read();
 
-    void do_write(const OrderResponse& response);
+    void do_write();
 
     void process_message(const boost::system::error_code&, std::size_t message_size);
 
@@ -45,6 +45,7 @@ private:
     TradingSystem* tradingSystem_;
     enum { max_length = 1024};
     char data_[max_length]; // buffer
+    OrderResponse response_ { };
 
 };
 

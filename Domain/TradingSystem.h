@@ -11,7 +11,7 @@
 struct ProcessResult
 {
     OrderID order_id;
-    uint8_t accepted_;
+    uint8_t accepted_; // 0 - order was somehow involved, 1 - no order involved
     Trades trades_;
 };
 

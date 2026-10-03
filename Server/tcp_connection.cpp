@@ -38,7 +38,9 @@ void tcp_connection::do_read() {
                         break;
                     default:
                         std::cerr << "Unknown command: " << static_cast<int>(header->command) << "\n";
-                        do_write({.accepted = 1, .status = 1, .order_id = 0});
+
+                        response_ = {.accepted = 1, .status = 1, .order_id = 0};
+                        do_write();
                     return;
                 }
                 if (expected_size > sizeof(Header))
@@ -71,7 +73,6 @@ void tcp_connection::process_message(const boost::system::error_code& ec, std::s
     if (!ec)
     {
         const Header* msg = reinterpret_cast<Header*>(data_);
-        OrderResponse resp;
 
         switch (msg->command)
         {
@@ -80,9 +81,7 @@ void tcp_connection::process_message(const boost::system::error_code& ec, std::s
                 OrderAdd* order_add = reinterpret_cast<OrderAdd*>(data_);
                 ProcessResult p_result = tradingSystem_->process(*order_add);
 
-                resp.accepted = p_result.accepted_;
-                resp.status = 0;
-                resp.order_id = p_result.order_id;
+                response_ = {.accepted = p_result.accepted_, .status = 0, .order_id = static_cast<uint32_t>(p_result.order_id)}; // TO-DO --- REMOVE STATIC CAST
                 break;
             }
         case 2:
@@ -95,15 +94,13 @@ void tcp_connection::process_message(const boost::system::error_code& ec, std::s
                 } catch (const std::invalid_argument& e)
                 {
                     std::cerr << "Exception: " << e.what() << std::endl;
-                    resp.accepted = 1;
-                    resp.status = 1;
-                    resp.order_id = 0;
+
+                    response_ = {.accepted = 1, .status = 1, .order_id = 0};
+
                     break;
                 }
 
-                resp.accepted = p_result.accepted_;
-                resp.status = 0;
-                resp.order_id = p_result.order_id;
+                response_ = {.accepted = p_result.accepted_, .status = 0, .order_id = static_cast<uint32_t>(p_result.order_id)}; // TO-DO --- REMOVE STATIC CAST
                 break;
             }
         case 3:
@@ -117,30 +114,27 @@ void tcp_connection::process_message(const boost::system::error_code& ec, std::s
                 } catch (const std::invalid_argument& e)
                 {
                     std::cerr << "Exception: " << e.what() << std::endl;
-                    resp.accepted = 1;
-                    resp.status = 1;
-                    resp.order_id = 0;
+
+                    response_ = {.accepted = 1, .status = 1, .order_id = 0};
                     break;
                 }
 
-                resp.accepted = p_result.accepted_;
-                resp.status = 0;
-                resp.order_id = p_result.order_id;
+                response_ = {.accepted = p_result.accepted_, .status = 0, .order_id = static_cast<uint32_t>(p_result.order_id)}; // TO-DO --- REMOVE STATIC CAST
                 break;
             }
         }
 
-        do_write(resp);
+        do_write();
     } else
     {
         std::cerr << "Error: " << ec.message() << "\n";
     }
 }
 
-void tcp_connection::do_write(const OrderResponse& response) {
+void tcp_connection::do_write() {
     auto self(shared_from_this());
     boost::asio::async_write(socket_,
-        boost::asio::buffer(&response, sizeof(OrderResponse)),
+        boost::asio::buffer(&response_, sizeof(response_)),
         [this, self](const boost::system::error_code& ec, std::size_t bytes_transferred) {
             handle_write(ec, bytes_transferred);
         });
